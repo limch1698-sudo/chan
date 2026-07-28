@@ -222,12 +222,18 @@ pub fn session_get_toggle_option_sync(session_id: SessionID, arg: String) -> Syn
 }
 
 pub fn session_get_option(session_id: SessionID, arg: String) -> Option<String> {
+    if arg == "audio_active" {
+        return Some(if crate::client::is_audio_active() { "true".to_owned() } else { "false".to_owned() });
+    }
     if let Some(session) = sessions::get_session_by_session_id(&session_id) {
         Some(session.get_option(arg))
     } else {
         None
     }
 }
+
+
+
 
 pub fn session_login(
     session_id: SessionID,

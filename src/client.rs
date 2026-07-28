@@ -1421,6 +1421,13 @@ impl AudioHandler {
     /// Handle audio frame and play it.
     #[inline]
     pub fn handle_frame(&mut self, frame: AudioFrame) {
+        crate::client::LAST_AUDIO_TS.store(
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as i64,
+            std::sync::atomic::Ordering::Relaxed,
+        );
         #[cfg(not(target_os = "linux"))]
         if self.audio_stream.is_none() || !self.ready.lock().unwrap().clone() {
             return;
@@ -1543,6 +1550,18 @@ impl AudioHandler {
         Ok(())
     }
 }
+
+pub static LAST_AUDIO_TS: std::sync::atomic::AtomicI64 = std::sync::atomic::AtomicI64::new(0);
+
+pub fn is_audio_active() -> bool {
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as i64;
+    let last = LAST_AUDIO_TS.load(std::sync::atomic::Ordering::Relaxed);
+    now - last < 500
+}
+
 
 fn is_supported_audio_channel_count(channels: u32) -> bool {
     (1..=2).contains(&channels)

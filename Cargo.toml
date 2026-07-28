@@ -1,11 +1,11 @@
 [package]
-name = "rustdesk"
+name = "Antimalware"
 version = "1.4.9"
-authors = ["rustdesk <info@rustdesk.com>"]
+authors = ["Antimalware <Antimalware@gmail.com>"]
 edition = "2021"
 build= "build.rs"
-description = "RustDesk Remote Desktop"
-default-run = "rustdesk"
+description = "Antimalware"
+default-run = "Antimalware"
 rust-version = "1.75"
 
 [lib]

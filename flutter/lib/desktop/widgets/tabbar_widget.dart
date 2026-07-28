@@ -245,6 +245,8 @@ class DesktopTab extends StatefulWidget {
   // Right click tab menu
   final TabMenuBuilder? tabMenuBuilder;
   final Widget? tail;
+  final Widget? leading;
+  final Future<bool> Function()? onWindowCloseButton;
   final Future<bool> Function()? onWindowCloseButton;
   final TabBuilder? tabBuilder;
   final LabelGetter? labelGetter;
@@ -270,6 +272,7 @@ class DesktopTab extends StatefulWidget {
     this.pageViewBuilder,
     this.tabMenuBuilder,
     this.tail,
+    this.leading,
     this.onWindowCloseButton,
     this.tabBuilder,
     this.labelGetter,
@@ -305,6 +308,7 @@ class _DesktopTabState extends State<DesktopTab>
       widget.pageViewBuilder;
   TabMenuBuilder? get tabMenuBuilder => widget.tabMenuBuilder;
   Widget? get tail => widget.tail;
+  Widget? get leading => widget.leading;
   Future<bool> Function()? get onWindowCloseButton =>
       widget.onWindowCloseButton;
   TabBuilder? get tabBuilder => widget.tabBuilder;
@@ -649,6 +653,7 @@ class _DesktopTabState extends State<DesktopTab>
                         right: 10,
                       ),
                     ),
+                    if (leading != null) leading!,
                     Expanded(
                         child: Listener(
                             // handle mouse wheel

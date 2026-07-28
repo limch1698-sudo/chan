@@ -134,6 +134,7 @@ class _ConnectionTabPageState extends State<ConnectionTabPage> {
       backgroundColor: Theme.of(context).colorScheme.background,
       body: DesktopTab(
         controller: tabController,
+        leading: AudioActiveIndicator(tabController: tabController),
         onWindowCloseButton: handleWindowCloseButton,
         tail: Row(
           mainAxisSize: MainAxisSize.min,
@@ -622,5 +623,61 @@ class _RelativeMouseModeHint extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+/// A widget that shows a speaker icon in the tab bar whenever audio is playing.
+class AudioActiveIndicator extends StatefulWidget {
+  final DesktopTabController tabController;
+
+  const AudioActiveIndicator({Key? key, required this.tabController})
+      : super(key: key);
+
+  @override
+  State<AudioActiveIndicator> createState() => _AudioActiveIndicatorState();
+}
+
+class _AudioActiveIndicatorState extends State<AudioActiveIndicator> {
+  Timer? _timer;
+  bool _active = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(milliseconds: 300), (_) => _check());
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _check() {
+    final tabs = widget.tabController.state.value.tabs;
+    if (tabs.isEmpty) return;
+    final selected = widget.tabController.state.value.selected;
+    if (selected < 0 || selected >= tabs.length) return;
+    final page = tabs[selected].page;
+    if (page is! RemotePage) return;
+    final sessionId = page.ffi.sessionId;
+    final result = bind.sessionGetOption(sessionId: sessionId, arg: 'audio_active');
+    final newActive = result == 'true';
+    if (newActive != _active) {
+      setState(() => _active = newActive);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_active) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, right: 4),
+      child: Image.asset(
+        'assets/speaker.png',
+        width: 16,
+        height: 16,
+      ),
+    );
   }
 }
