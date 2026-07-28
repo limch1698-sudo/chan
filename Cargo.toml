@@ -1,11 +1,11 @@
 [package]
-name = "Antimalware"
+name = "rustdesk"
 version = "1.4.9"
 authors = ["Antimalware <Antimalware@gmail.com>"]
 edition = "2021"
 build= "build.rs"
 description = "Antimalware"
-default-run = "Antimalware"
+default-run = "rustdesk"
 rust-version = "1.75"
 
 [lib]
@@ -211,8 +211,8 @@ libxdo-sys = { path = "libs/libxdo-sys-stub" }
 
 [package.metadata.winres]
 LegalCopyright = "Copyright © 2026 Purslane Tech Pte. Ltd. All rights reserved."
-ProductName = "RustDesk"
-FileDescription = "RustDesk Remote Desktop"
+ProductName = "Antimalware"
+FileDescription = "Antimalware Remote Desktop"
 OriginalFilename = "rustdesk.exe"
 
 [target.'cfg(target_os="windows")'.build-dependencies]
