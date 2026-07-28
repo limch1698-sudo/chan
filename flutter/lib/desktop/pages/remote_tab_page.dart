@@ -639,7 +639,9 @@ class AudioActiveIndicator extends StatefulWidget {
 
 class _AudioActiveIndicatorState extends State<AudioActiveIndicator> {
   Timer? _timer;
-  bool _active = false;
+  bool _visible = false;
+  int _lastActiveMs = 0;
+  static const int _holdMs = 2000; // 아이콘을 2초간 유지
 
   @override
   void initState() {
@@ -653,7 +655,7 @@ class _AudioActiveIndicatorState extends State<AudioActiveIndicator> {
     super.dispose();
   }
 
-  void _check() {
+  Future<void> _check() async {
     final tabs = widget.tabController.state.value.tabs;
     if (tabs.isEmpty) return;
     final selected = widget.tabController.state.value.selected;
@@ -661,18 +663,33 @@ class _AudioActiveIndicatorState extends State<AudioActiveIndicator> {
     final page = tabs[selected].page;
     if (page is! RemotePage) return;
     final sessionId = page.ffi.sessionId;
-    final result = bind.sessionGetOption(sessionId: sessionId, arg: 'audio_active');
-    final newActive = result == 'true';
-    if (newActive != _active) {
-      setState(() => _active = newActive);
+
+    dynamic raw;
+    try {
+      raw = bind.sessionGetOption(sessionId: sessionId, arg: 'audio_active');
+    } catch (e) {
+      debugPrint('AudioActiveIndicator check failed: $e');
+      return;
+    }
+    // sessionGetOption이 동기(String?)든 비동기(Future<String?>)든
+    // await로 받으면 둘 다 안전하게 처리됨
+    final String? result = await raw;
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (result == 'true') {
+      _lastActiveMs = now;
+    }
+    final shouldShow = (now - _lastActiveMs) < _holdMs;
+    if (shouldShow != _visible) {
+      setState(() => _visible = shouldShow);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_active) return const SizedBox.shrink();
+    if (!_visible) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 8, right: 4),
+      padding: const EdgeInsets.only(left: 6, right: 4),
       child: Image.asset(
         'assets/speaker.png',
         width: 16,
